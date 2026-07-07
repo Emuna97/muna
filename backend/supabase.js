@@ -41,3 +41,8 @@ const supabase = hasSupabaseConfig
   : createSupabaseStub();
 
 module.exports = supabase;
+
+// Log Supabase env status (do not print secret value)
+console.log('Supabase URL present:', Boolean(SUPABASE_URL));
+console.log('Supabase secret key present:', Boolean(SUPABASE_SECRET_KEY));
+console.log('Supabase client configured:', Boolean(hasSupabaseConfig));
