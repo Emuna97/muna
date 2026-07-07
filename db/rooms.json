@@ -1,0 +1,377 @@
+[
+  {
+    "id": 1,
+    "name": "Room 201",
+    "city": "2nd Floor",
+    "price": 450,
+    "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400",
+    "desc": "Private Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "PayPal"
+    ],
+    "features": [
+      "Private bedroom",
+      "Shared bathroom",
+      "High-speed Wi-Fi",
+      "Furnished with bed and desk",
+      "Access to common kitchen",
+      "24/7 security"
+    ],
+    "fullDescription": "Experience comfort in Room 201. Each room is equipped with essential furniture and comes with shared bathroom access.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.859Z"
+  },
+  {
+    "id": 2,
+    "name": "Room 202",
+    "city": "2nd Floor",
+    "price": 400,
+    "image": "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400",
+    "desc": "Double Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "Kakao Pay"
+    ],
+    "features": [
+      "Spacious bedroom for two",
+      "Shared bathroom facilities",
+      "Premium Wi-Fi connection",
+      "Modern furniture set",
+      "Kitchenette access",
+      "Laundry room available"
+    ],
+    "fullDescription": "Room 202 is perfect for two roommates. Our building offers excellent amenities.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.859Z"
+  },
+  {
+    "id": 3,
+    "name": "Room 203",
+    "city": "2nd Floor",
+    "price": 420,
+    "image": "https://images.unsplash.com/photo-1501183638710-841dd1904471?w=400",
+    "desc": "Triple Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "PayPal"
+    ],
+    "features": [
+      "Large bedroom for three",
+      "Shared bathroom facilities",
+      "High-speed Wi-Fi",
+      "Multiple beds and desks",
+      "Shared common area access"
+    ],
+    "fullDescription": "Room 203 offers great value for three roommates. Enjoy spacious accommodations.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.860Z"
+  },
+  {
+    "id": 4,
+    "name": "Room 204",
+    "city": "2nd Floor",
+    "price": 320,
+    "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400",
+    "desc": "Shared Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "Naver Pay"
+    ],
+    "features": [
+      "Shared bedroom",
+      "Access to common bathroom",
+      "Free Wi-Fi connection",
+      "Basic furnished setup",
+      "Common kitchen facilities",
+      "Study lounge access"
+    ],
+    "fullDescription": "Room 204 provides affordable housing. Share a room with compatible roommates.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.860Z"
+  },
+  {
+    "id": 5,
+    "name": "Room 205",
+    "city": "2nd Floor",
+    "price": 450,
+    "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400",
+    "desc": "Private Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "PayPal"
+    ],
+    "features": [
+      "Private bedroom",
+      "Shared bathroom",
+      "High-speed Wi-Fi",
+      "Furnished with bed and desk",
+      "Access to common kitchen",
+      "24/7 security"
+    ],
+    "fullDescription": "Room 205 offers a comfortable private space.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.860Z"
+  },
+  {
+    "id": 6,
+    "name": "Room 206",
+    "city": "2nd Floor",
+    "price": 380,
+    "image": "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400",
+    "desc": "Double Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "Kakao Pay"
+    ],
+    "features": [
+      "Spacious bedroom for two",
+      "Shared bathroom facilities",
+      "Premium Wi-Fi connection",
+      "Modern furniture set",
+      "Kitchenette access",
+      "Laundry room available"
+    ],
+    "fullDescription": "Room 206 is perfect for two roommates.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.860Z"
+  },
+  {
+    "id": 7,
+    "name": "Room 207",
+    "city": "2nd Floor",
+    "price": 420,
+    "image": "https://images.unsplash.com/photo-1501183638710-841dd1904471?w=400",
+    "desc": "Triple Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "PayPal"
+    ],
+    "features": [
+      "Large bedroom for three",
+      "Shared bathroom facilities",
+      "High-speed Wi-Fi",
+      "Multiple beds and desks",
+      "Shared common area access"
+    ],
+    "fullDescription": "Room 207 is ideal for three students.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.860Z"
+  },
+  {
+    "id": 8,
+    "name": "Room 301",
+    "city": "3rd Floor",
+    "price": 500,
+    "image": "https://images.unsplash.com/photo-1501183638710-841dd1904471?w=400",
+    "desc": "Premium Private Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "Apple Pay"
+    ],
+    "features": [
+      "Large private bedroom",
+      "Ensuite bathroom",
+      "Ultra-fast Wi-Fi",
+      "Premium bedding",
+      "Mini refrigerator",
+      "Personal study area"
+    ],
+    "fullDescription": "Indulge in luxury living at Room 301.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.861Z"
+  },
+  {
+    "id": 9,
+    "name": "Room 302",
+    "city": "3rd Floor",
+    "price": 320,
+    "image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400",
+    "desc": "Shared Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "Naver Pay"
+    ],
+    "features": [
+      "Shared bedroom",
+      "Access to common bathroom",
+      "Free Wi-Fi connection",
+      "Basic furnished setup",
+      "Common kitchen facilities",
+      "Study lounge access"
+    ],
+    "fullDescription": "Room 302 provides affordable housing on 3rd floor.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.862Z"
+  },
+  {
+    "id": 10,
+    "name": "Room 303",
+    "city": "3rd Floor",
+    "price": 450,
+    "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400",
+    "desc": "Private Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "PayPal"
+    ],
+    "features": [
+      "Private bedroom",
+      "Shared bathroom",
+      "High-speed Wi-Fi",
+      "Furnished with bed and desk",
+      "Access to common kitchen",
+      "24/7 security"
+    ],
+    "fullDescription": "Room 303 offers comfortable private space on 3rd floor.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.862Z"
+  },
+  {
+    "id": 11,
+    "name": "Room 304",
+    "city": "3rd Floor",
+    "price": 380,
+    "image": "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400",
+    "desc": "Double Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "Kakao Pay"
+    ],
+    "features": [
+      "Spacious bedroom for two",
+      "Shared bathroom facilities",
+      "Premium Wi-Fi connection",
+      "Modern furniture set",
+      "Kitchenette access",
+      "Laundry room available"
+    ],
+    "fullDescription": "Room 304 is perfect for two roommates.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.862Z"
+  },
+  {
+    "id": 12,
+    "name": "Room 305",
+    "city": "3rd Floor",
+    "price": 420,
+    "image": "https://images.unsplash.com/photo-1501183638710-841dd1904471?w=400",
+    "desc": "Triple Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "PayPal"
+    ],
+    "features": [
+      "Large bedroom for three",
+      "Shared bathroom facilities",
+      "High-speed Wi-Fi",
+      "Multiple beds and desks",
+      "Shared common area access"
+    ],
+    "fullDescription": "Room 305 is ideal for three students.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.862Z"
+  },
+  {
+    "id": 13,
+    "name": "Room 306",
+    "city": "3rd Floor",
+    "price": 450,
+    "image": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400",
+    "desc": "Private Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "PayPal"
+    ],
+    "features": [
+      "Private bedroom",
+      "Shared bathroom",
+      "High-speed Wi-Fi",
+      "Furnished with bed and desk",
+      "Access to common kitchen",
+      "24/7 security"
+    ],
+    "fullDescription": "Room 306 offers comfortable private space on 3rd floor.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.862Z"
+  },
+  {
+    "id": 14,
+    "name": "Room 307",
+    "city": "3rd Floor",
+    "price": 480,
+    "image": "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400",
+    "desc": "Premium Double Room",
+    "phone": "+82-2-1234-5678",
+    "email": "info@muna.kr",
+    "address": "136 W 12th Ave, Emporia, Kansas",
+    "paymentMethods": [
+      "Credit Card",
+      "Bank Transfer",
+      "PayPal"
+    ],
+    "features": [
+      "Spacious premium bedroom for two",
+      "Ensuite bathroom",
+      "Ultra-fast Wi-Fi",
+      "Premium bedding",
+      "Mini refrigerator",
+      "Personal study area"
+    ],
+    "fullDescription": "Room 307 is premium option on 3rd floor.",
+    "isAvailable": true,
+    "createdAt": "2026-07-07T02:45:24.863Z"
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Hyungro Park",
+    "email": "hpark9@g.emporia.edu",
+    "password": "$2b$10$KAJyoojn3ypHrYbeVYmN3umBS3OLzdW0PXTtSdc/k42mRECnxlFjC",
+    "phone": "078-5342-4029",
+    "address": "138 W 12th Ave #3 Apt name: State Apt",
+    "role": "user",
+    "bookedRoom": null,
+    "id": "1783392518882nrykwo1vf",
+    "createdAt": "2026-07-07T02:48:38.883Z"
+  }
+]

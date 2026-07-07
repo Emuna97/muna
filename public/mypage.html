@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Page - MUNA Dorm</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: #f5f5f5;
+    }
+
+    .mypage-container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header-section h1 {
+      color: #1e272e;
+      margin: 0;
+    }
+
+    .logout-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .logout-btn:hover {
+      background: #c0392b;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 25px;
+    }
+
+    .card h2 {
+      color: #1e272e;
+      margin-top: 0;
+      border-bottom: 2px solid #27ae60;
+      padding-bottom: 10px;
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: bold;
+      color: #555;
+    }
+
+    .info-value {
+      color: #333;
+    }
+
+    .room-info-value {
+      color: #27ae60;
+      font-weight: bold;
+    }
+
+    .rent-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    .rent-table th {
+      background: #ecf0f1;
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+      color: #1e272e;
+      border-bottom: 2px solid #bdc3c7;
+    }
+
+    .rent-table td {
+      padding: 12px;
+      border-bottom: 1px solid #ecf0f1;
+      color: #333;
+    }
+
+    .rent-table tr:hover {
+      background: #f9f9f9;
+    }
+
+    .status-paid {
+      color: #27ae60;
+      font-weight: bold;
+    }
+
+    .status-pending {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+
+    .payment-method {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .payment-option {
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .payment-option:hover {
+      border-color: #27ae60;
+      background: #f0fdf4;
+    }
+
+    .payment-option.selected {
+      border-color: #27ae60;
+      background: #27ae60;
+      color: white;
+    }
+
+    .pay-btn {
+      width: 100%;
+      padding: 12px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .pay-btn:hover {
+      background: #229954;
+    }
+
+    .no-room {
+      background: #fef5e7;
+      padding: 15px;
+      border-left: 4px solid #f39c12;
+      border-radius: 3px;
+      color: #d68910;
+    }
+
+    .no-payments {
+      text-align: center;
+      color: #999;
+      padding: 20px;
+    }
+
+    .month-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .month-option {
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .month-option:hover {
+      border-color: #27ae60;
+    }
+
+    .month-option.selected {
+      border-color: #27ae60;
+      background: #27ae60;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header style="background: #2c3e50; color: white; padding: 20px; text-align: center;">
+    <h1 style="margin: 0;">MUNA Dorm</h1>
+  </header>
+
+  <div id="login-check" style="display:none"></div>
+
+  <div class="mypage-container">
+    <div class="header-section">
+      <h1>My Page</h1>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+
+    <!-- Member Information (Unified Edit) -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0;">Member Information</h2>
+        <button id="edit-mode-toggle" onclick="toggleEditMode()" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: bold;">Edit</button>
+      </div>
+
+      <!-- View Mode -->
+      <div id="view-mode" style="display: block;">
+        <div class="info-row">
+          <div class="info-label">Name</div>
+          <div class="info-value" id="member-name"></div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Email</div>
+          <div class="info-value" id="member-email"></div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Phone</div>
+          <div class="info-value" id="member-phone"></div>
+        </div>
+      </div>
+
+      <!-- Edit Mode -->
+      <div id="edit-mode" style="display: none; grid-template-columns: 1fr; gap: 15px;">
+        <div class="form-group">
+          <label for="edit-name" style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Name</label>
+          <input type="text" id="edit-name" placeholder="Enter name" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+          <div class="error" id="edit-name-error" style="color: #e74c3c; font-size: 13px; margin-top: 5px;"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-email" style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Email</label>
+          <input type="email" id="edit-email" placeholder="Enter email" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+          <div class="error" id="edit-email-error" style="color: #e74c3c; font-size: 13px; margin-top: 5px;"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-phone" style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Phone</label>
+          <input type="tel" id="edit-phone" placeholder="5551234567" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+          <div class="error" id="edit-phone-error" style="color: #e74c3c; font-size: 13px; margin-top: 5px;"></div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <button onclick="submitUpdateMemberInfo()" style="flex: 1; background: #27ae60; color: white; border: none; padding: 12px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer;">Save</button>
+          <button onclick="cancelEditMode()" style="flex: 1; background: #95a5a6; color: white; border: none; padding: 12px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer;">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room Information -->
+    <div class="card">
+      <h2>Current Room</h2>
+      <div id="room-info">
+        <div class="no-room">No room assigned yet.</div>
+      </div>
+    </div>
+
+    <!-- Rent Payment -->
+    <div class="card">
+      <h2>Pay Rent</h2>
+      <div id="rent-payment-section" style="display:none">
+        <div class="info-row">
+          <div class="info-label">Monthly Rent</div>
+          <div class="info-value" id="monthly-rent">-</div>
+        </div>
+
+        <h3 style="color:#1e272e;margin-top:20px">Select Payment Method</h3>
+        <div class="payment-method" id="payment-methods"></div>
+
+        <button class="pay-btn" onclick="processPayment()">Pay Now</button>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="card">
+      <h2>Payment History</h2>
+      <div id="rent-history"></div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card">
+      <h2>Change Password</h2>
+      <div id="password-change-section">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+          <div class="form-group">
+            <label for="current-password" style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Current Password</label>
+            <input type="password" id="current-password" placeholder="Enter current password" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+            <div class="error" id="current-password-error" style="color: #e74c3c; font-size: 13px; margin-top: 5px;"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="new-password" style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">New Password</label>
+            <input type="password" id="new-password" placeholder="Enter new password (6+ characters)" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+            <div class="error" id="new-password-error" style="color: #e74c3c; font-size: 13px; margin-top: 5px;"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="new-password-confirm" style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Confirm New Password</label>
+            <input type="password" id="new-password-confirm" placeholder="Confirm new password" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+            <div class="error" id="new-password-confirm-error" style="color: #e74c3c; font-size: 13px; margin-top: 5px;"></div>
+          </div>
+
+          <button onclick="changePassword()" style="background: #27ae60; color: white; border: none; padding: 12px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;">Update</button>
+        </div>
+      </div>
+    </div>
+
+  <script src="data.js"></script>
+  <script src="mypage.js"></script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Panel</title>
+<link rel="stylesheet" href="styles.css"/>
+<style>
+  .admin-login{max-width:400px;margin:50px auto;background:#fff;padding:30px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.1);text-align:center;display:flex;flex-direction:column;align-items:center}
+  .admin-login h2{color:#1e272e;margin-bottom:20px}
+  .admin-login input{width:200px;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px;font-size:14px}
+  .admin-login button{width:100%;padding:12px;background:#667eea;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:16px;margin-top:20px}
+  .admin-login button:hover{background:#764ba2}
+  
+  header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;background:#1e272e;color:#fff;padding:15px}
+  header .logo{font-size:18px;font-weight:bold}
+  header a{color:#fff;text-decoration:none;word-break:break-word}
+  .admin-panel{max-width:100%;margin:0 auto;padding:20px;box-sizing:border-box;width:100%}
+  .admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:10px}
+  .admin-header h1{margin:0;color:#1e272e;white-space:nowrap}
+  .logout-btn{background:#e74c3c;color:#fff;border:none;padding:10px 20px;border-radius:5px;cursor:pointer}
+  .logout-btn:hover{background:#c0392b}
+  
+  .room-card{background:#fff;padding:20px;margin:20px 0;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.1);border-left:4px solid #667eea}
+  .room-card h3{margin:0 0 15px 0;color:#1e272e}
+  
+  .responsive-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+  .responsive-grid-sm{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .responsive-flex{display:flex;gap:10px;flex-wrap:wrap}
+  .full-width-input{width:100%}
+  .table-wrapper{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  
+  .gallery-section{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #eee}
+  .gallery-section h4{margin:0 0 10px 0;color:#1e272e}
+  .gallery-preview{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .gallery-preview img{width:60px;height:60px;object-fit:cover;border-radius:5px;border:2px solid #ddd}
+  .gallery-upload-btn{background:#667eea;color:#fff;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;font-size:14px}
+  .gallery-upload-btn:hover{background:#764ba2}
+  
+  .edit-form{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+  .edit-form-group{display:flex;flex-direction:column}
+  .edit-form-group label{font-weight:bold;margin-bottom:5px;color:#1e272e;font-size:14px}
+  .edit-form-group input,.edit-form-group select{padding:8px;border:1px solid #ddd;border-radius:5px;font-size:14px}
+  .edit-form-group input:focus,.edit-form-group select:focus{outline:none;border-color:#667eea;box-shadow:0 0 5px rgba(102,126,234,0.3)}
+  
+  .payment-checkboxes{display:flex;flex-wrap:wrap;gap:10px}
+  .payment-checkboxes label{display:flex;align-items:center;font-weight:normal}
+  .payment-checkboxes input{margin-right:5px}
+  
+  .room-actions{display:flex;gap:10px;margin-top:15px;grid-column:1/3}
+  .save-btn{flex:1;background:#00b894;color:#fff;border:none;padding:12px;border-radius:5px;cursor:pointer;font-weight:bold}
+  .save-btn:hover{background:#009c7a}
+  .reset-all-btn{padding:10px 20px;background:#95a5a6;color:#fff;border:none;border-radius:5px;cursor:pointer;margin-top:20px}
+  .reset-all-btn:hover{background:#7f8c8d}
+  
+  .bg-preview-container{position:relative;width:100%;height:300px;border:2px solid #ddd;border-radius:5px;overflow:hidden;background:#f0f0f0;cursor:crosshair;margin:10px 0}
+  .bg-preview-container img{width:100%;height:100%;object-fit:cover;display:block}
+  .bg-preview-crosshair{position:absolute;width:30px;height:30px;border:2px solid rgba(255,0,0,0.7);border-radius:50%;pointer-events:none;background:rgba(255,0,0,0.1);margin-left:-15px;margin-top:-15px}
+  .bg-preview-crosshair::before{content:'';position:absolute;width:2px;height:10px;background:rgba(255,0,0,0.7);left:50%;top:50%;transform:translateX(-50%) translateY(-50%)}
+  .bg-preview-crosshair::after{content:'';position:absolute;height:2px;width:10px;background:rgba(255,0,0,0.7);left:50%;top:50%;transform:translateX(-50%) translateY(-50%)}
+  
+  table{width:100%;border-collapse:collapse;min-width:0}
+  table th, table td{word-break:break-word;white-space:normal;line-height:1.4}
+  .admin-panel table{display:block;width:100%;overflow-x:auto;min-width:0}
+  .admin-panel table thead, .admin-panel table tbody, .admin-panel table tr{display:table;width:100%;box-sizing:border-box}
+  .admin-panel table th, .admin-panel table td{word-break:break-word;white-space:normal;line-height:1.4;padding:12px;vertical-align:top}
+  .admin-panel table th{font-weight:bold}
+  .admin-panel table td{max-width:220px}
+
+  @media(max-width:768px){
+    body{overflow-x:hidden}
+    .admin-header{flex-direction:column;align-items:flex-start;gap:12px}
+    .admin-panel{padding:15px}
+    .admin-login{margin:20px auto;width:calc(100% - 30px)}
+    .edit-form{grid-template-columns:1fr}
+    .room-actions{grid-column:1}
+    .admin-panel table{overflow-x:auto;display:block;width:100%;min-width:0}
+    .admin-panel table thead, .admin-panel table tbody, .admin-panel table tr{display:table;width:100%;box-sizing:border-box}
+    .admin-panel table th, .admin-panel table td{font-size:13px;padding:10px;word-break:break-word;white-space:normal}
+    .booking-management, #members-management, #rent-status-management, #homepage-management, #amenities-management, #member-creation{padding:15px}
+    .admin-panel input, .admin-panel select, .admin-panel textarea, .admin-panel button{max-width:100%;width:100%;box-sizing:border-box}
+    .payment-checkboxes{flex-direction:column;align-items:flex-start}
+    .payment-checkboxes label{width:100%}
+    .room-actions{flex-direction:column}
+    .save-btn, .reset-all-btn{width:100%}
+    .gallery-preview{justify-content:flex-start}
+    .table-wrapper{margin-bottom:10px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">MUNA Admin</div>
+<a href="index.html" style="color:white">← Back</a>
+</header>
+
+<div id="login-section" class="admin-login" style="display:block">
+  <h2>Admin Login</h2>
+  <input type="password" id="admin-password" placeholder="Enter password" style="margin:20px 0"/>
+  <button onclick="adminLogin()">Login</button>
+</div>
+
+<div id="admin-section" style="display:none">
+  <div class="admin-panel">
+    <div class="admin-header">
+      <h1>Room Management</h1>
+      <button class="logout-btn" onclick="adminLogout()">Logout</button>
+    </div>
+    
+    <div id="amenities-management" style="background:#fff;padding:20px;margin:20px 0;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.1);border-left:4px solid #f39c12">
+      <h3 style="margin:0 0 15px 0;color:#1e272e">Building Amenities Management</h3>
+      <div id="amenities-list"></div>
+      <button class="save-btn" onclick="saveAmenities()" style="margin-top:15px;width:100%">Save Amenities</button>
+    </div>
+    
+    <div id="homepage-management" style="background:#fff;padding:20px;margin:20px 0;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.1);border-left:4px solid #27ae60">
+      <h3 style="margin:0 0 15px 0;color:#1e272e">Homepage Settings</h3>
+      <div style="margin-bottom:15px">
+        <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Title</label>
+        <input type="text" id="homepage_title" placeholder="Enter homepage title" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:14px;box-sizing:border-box"/>
+      </div>
+      <div style="margin-bottom:15px">
+        <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Background Color</label>
+        <input type="color" id="homepage_bgColor" style="width:100%;height:50px;border:1px solid #ddd;border-radius:5px;cursor:pointer"/>
+      </div>
+      <div style="margin-bottom:15px">
+        <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Background Image (Optional)</label>
+        <input type="file" id="homepage_bgImage" accept="image/*" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;font-size:14px;box-sizing:border-box"/>
+        <small style="color:#999;display:block;margin-top:5px">If image is selected, background color will be ignored</small>
+      </div>
+      <div id="bg-preview-section" style="display:none;margin-bottom:15px">
+        <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Select Image Position (Click with mouse)</label>
+        <div class="bg-preview-container" id="bg-preview-container" style="position:relative;overflow:hidden;">
+          <img id="bg-preview-image" src="" alt="Background Preview" style="width:100%;height:100%;object-fit:cover;"/>
+          <div class="bg-preview-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.35);pointer-events:none"></div>
+          <div id="bg-preview-title" style="position:absolute;left:20px;bottom:20px;color:#fff;font-size:20px;font-weight:bold;text-shadow:0 2px 8px rgba(0,0,0,.7);pointer-events:none;">Homepage Preview</div>
+          <div class="bg-preview-crosshair" id="bg-preview-crosshair"></div>
+        </div>
+        <small style="color:#666;display:block;margin-top:8px">Move your mouse to the desired position to see a real-time preview. <strong>Click</strong> on the desired position to lock it.</small>
+      </div>
+      <button class="save-btn" onclick="saveHomePageSettings()" style="width:100%">Save Homepage Settings</button>
+    </div>
+    
+    <!-- Member Registration Section -->
+    <div id="member-creation" style="background:#fff;padding:20px;margin:20px 0;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.1);border-left:4px solid #e67e22">
+      <h3 style="margin:0 0 15px 0;color:#1e272e">Resident Registration (Create Account)</h3>
+      <p style="color:#666;font-size:13px;margin:0 0 15px 0">Create an account for residents who have completed their lease agreement. Provide the auto-generated temporary password to the resident.</p>
+      
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:15px">
+        <div>
+          <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Name *</label>
+          <input type="text" id="create-member-name" placeholder="e.g. John Smith" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:14px;box-sizing:border-box"/>
+        </div>
+        <div>
+          <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Login ID or Email *</label>
+          <input type="text" id="create-member-email" placeholder="Enter login ID or email" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:14px;box-sizing:border-box"/>
+        </div>
+        <div>
+          <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Phone Number *</label>
+          <input type="tel" id="create-member-phone" placeholder="e.g. 5551234567" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:14px;box-sizing:border-box"/>
+        </div>
+        <div>
+          <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Password (Optional)</label>
+          <div style="display:flex;gap:5px;align-items:flex-end">
+            <input type="text" id="create-member-password" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:14px;box-sizing:border-box"/>
+            <button onclick="generatePassword()" style="padding:10px 15px;background:#95a5a6;color:white;border:none;border-radius:5px;cursor:pointer;font-size:13px;white-space:nowrap">Auto Generate</button>
+          </div>
+          <small style="color:#999;display:block;margin-top:5px">Leave empty for auto-generated temporary password</small>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:15px">
+        <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Room Number *</label>
+        <select id="create-member-room" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:14px;box-sizing:border-box">
+          <option value="">Select Room</option>
+        </select>
+      </div>
+      
+      <div style="display:flex;gap:10px;margin-bottom:15px">
+        <button onclick="createMemberAccount()" style="flex:1;padding:12px;background:#27ae60;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:14px">Create Account</button>
+      </div>
+      
+      <div class="error" id="member-create-error" style="color:#e74c3c;font-size:13px;margin-bottom:10px;display:none;padding:10px;background:#fadbd8;border-radius:5px"></div>
+      <div style="color:#27ae60;font-size:13px;display:none;padding:10px;background:#d5f4e6;border-radius:5px" id="member-create-success"></div>
+      
+      <div id="created-member-info" style="display:none;background:#ecf0f1;padding:15px;border-radius:5px;margin-top:15px;border-left:4px solid #e67e22">
+        <h4 style="margin:0 0 10px 0;color:#1e272e">✓ Account Created Successfully</h4>
+        <p style="margin:5px 0;color:#2c3e50"><strong>Email:</strong> <span id="created-email"></span></p>
+        <p style="margin:5px 0;color:#2c3e50"><strong>Password:</strong> <span id="created-password" style="font-family:monospace;font-weight:bold"></span></p>
+        <p style="margin:10px 0 0 0;color:#999;font-size:12px">Share this information with the resident. Password change recommended after first login.</p>
+      </div>
+    </div>
+    
+    <div id="members-management" style="background:#fff;padding:20px;margin:20px 0;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.1);border-left:4px solid #3498db">
+      <h3 style="margin:0 0 15px 0;color:#1e272e">Member Management</h3>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:15px">
+        <thead>
+          <tr style="background:#ecf0f1;border-bottom:2px solid #bdc3c7">
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Name</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Email</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Phone</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Join Date</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Status</th>
+            <th style="padding:12px;text-align:center;color:#1e272e;font-weight:bold">Action</th>
+          </tr>
+        </thead>
+        <tbody id="members-table-body">
+        </tbody>
+      </table>
+    </div>
+
+    <div id="booking-management" style="background:#fff;padding:20px;margin:20px 0;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.1);border-left:4px solid #16a085">
+      <h3 style="margin:0 0 15px 0;color:#1e272e">Booking Management</h3>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:15px">
+        <thead>
+          <tr style="background:#ecf0f1;border-bottom:2px solid #bdc3c7">
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Name</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Email</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Phone</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Room</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Move-in</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Payment</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Special Requests</th>
+            <th style="padding:12px;text-align:center;color:#1e272e;font-weight:bold">Status</th>
+          </tr>
+        </thead>
+        <tbody id="booking-status-body">
+        </tbody>
+      </table>
+    </div>
+    
+    <div id="rent-status-management" style="background:#fff;padding:20px;margin:20px 0;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.1);border-left:4px solid #9b59b6">
+      <h3 style="margin:0 0 15px 0;color:#1e272e">Rent Payment Status</h3>
+      <div style="margin-bottom:15px">
+        <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Select Month</label>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+          <select id="rent-year" style="padding:8px;border:1px solid #ddd;border-radius:5px;font-size:14px;box-sizing:border-box">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+          </select>
+          <select id="rent-month" style="padding:8px;border:1px solid #ddd;border-radius:5px;font-size:14px;box-sizing:border-box">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+        </div>
+        <button onclick="loadRentStatus()" style="width:100%;margin-top:10px;padding:10px;background:#9b59b6;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold">Query</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-top:15px" id="rent-status-table">
+        <thead>
+          <tr style="background:#ecf0f1;border-bottom:2px solid #bdc3c7">
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Name</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Email</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Room</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Rent</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Payment Status</th>
+            <th style="padding:12px;text-align:left;color:#1e272e;font-weight:bold">Payment Method</th>
+            <th style="padding:12px;text-align:center;color:#1e272e;font-weight:bold">Action</th>
+          </tr>
+        </thead>
+        <tbody id="rent-status-body">
+          <tr><td colspan="7" style="text-align:center;padding:20px;color:#999">Click Query to view payment status</td></tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Lease Agreement Management Section -->
+    <div id="lease-agreement-management" style="background:#fff;padding:20px;margin:20px 0;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.1);border-left:4px solid #e74c3c">
+      <h3 style="margin:0 0 15px 0;color:#1e272e">Lease Agreement Management</h3>
+      <div style="margin-bottom:15px">
+        <label style="display:block;margin-bottom:5px;color:#1e272e;font-weight:bold;font-size:14px">Agreement Content</label>
+        <textarea id="lease-agreement-text" style="width:100%;height:300px;padding:10px;border:1px solid #ddd;border-radius:5px;font-size:13px;box-sizing:border-box;font-family:monospace;resize:vertical" placeholder="Enter lease agreement content"></textarea>
+        <small style="color:#999;display:block;margin-top:5px">Minimum 50 characters required</small>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <button onclick="saveLeaseAgreement()" style="padding:12px;background:#27ae60;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:14px">Save Agreement</button>
+        <button onclick="resetLeaseAgreement()" style="padding:12px;background:#95a5a6;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:14px">Reset to Default</button>
+      </div>
+      <div class="error" id="lease-save-error" style="color:#e74c3c;font-size:13px;margin-top:10px;display:none"></div>
+      <div style="color:#27ae60;font-size:13px;margin-top:10px;display:none" id="lease-save-success">✓ Agreement saved!</div>
+    </div>
+    
+    <div id="rooms-list"></div>
+    <button class="reset-all-btn" onclick="resetAllData()">Reset All Data</button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>

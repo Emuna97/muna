@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DormFind</title>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<header>
+<div class="logo">MUNA</div>
+<div style="display:flex; gap:15px">
+  <span id="user-info" style="color:#999;font-size:12px;display:none"></span>
+  <a href="#" id="mypage-link" style="color:#999;font-size:12px;text-decoration:none;display:none">My Page</a>
+  <a href="login.html" id="login-link" style="color:#999;font-size:12px;text-decoration:none">Login</a>
+  <a href="admin.html" id="admin-link" style="color:#999;font-size:12px;text-decoration:none">Admin</a>
+</div>
+</header>
+
+<section class="hero" id="hero">
+<h1 id="hero-title">Find Your Perfect Dorm</h1>
+</section>
+
+<section id="list" class="container"></section>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
