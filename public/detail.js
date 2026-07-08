@@ -16,8 +16,8 @@ window.onload = async () => {
       <h1>${d.name}</h1>
       <h3>${d.city}</h3>
       <p class="price-big">${d.price}</p>
-      <p>${d.desc}</p>
-      <p class="address"><strong>📍 Address:</strong> ${d.address}</p>
+      <p>${d.fullDescription || d.description || d.desc}</p>
+      <p class="address"><strong>📍 Address:</strong> ${d.address || '136 W 12th Ave, Emporia, Kansas'}</p>
     </div>
   </div>
 
@@ -37,7 +37,7 @@ window.onload = async () => {
 
     <div class="map-section">
       <h2>Location Map</h2>
-      <iframe width="100%" height="400" style="border:0;border-radius:10px;" src="https://maps.google.com/maps?q=136+W+12th+Ave,+Emporia,+KS+66801&output=embed" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <iframe width="100%" height="400" style="border:0;border-radius:10px;" src="https://maps.google.com/maps?q=${encodeURIComponent(d.address || '136 W 12th Ave, Emporia, Kansas')}&output=embed" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
 
     <div class="booking-section">

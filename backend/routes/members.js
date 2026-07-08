@@ -18,7 +18,9 @@ function normalizeMember(row) {
     booked_room: row.booked_room || null,
     username: row.username || row.email,
     created_by_admin: row.created_by_admin || false,
-    role: row.role || 'user'
+    role: row.role || 'user',
+    room_assignment: row.room_assignment || null,
+    rent_payments: row.rent_payments || []
   };
 }
 
@@ -49,21 +51,28 @@ function isAdminRequest(req) {
 // Get all members
 router.get('/', async (req, res) => {
   try {
-    if (!supabase.isConfigured) {
-      return res.json({ success: true, members: readMembersFromStore() });
+    // Try JSON first (contains room_assignment and rent_payments)
+    let members = readMembersFromStore();
+    if (members && members.length > 0) {
+      return res.json({ success: true, members });
     }
 
-    const { data, error } = await supabase
-      .from('members')
-      .select('*')
-      .order('id', { ascending: true });
+    // Fall back to Supabase if JSON is empty
+    if (supabase.isConfigured) {
+      const { data, error } = await supabase
+        .from('members')
+        .select('*')
+        .order('id', { ascending: true });
 
-    if (error) {
-      console.error('Supabase members fetch error:', error.message || error);
-      return res.status(500).json({ success: false, message: 'Failed to fetch members' });
+      if (error) {
+        console.error('Supabase members fetch error:', error.message || error);
+        return res.status(500).json({ success: false, message: 'Failed to fetch members' });
+      }
+
+      return res.json({ success: true, members: (data || []).map(normalizeMember) });
     }
 
-    res.json({ success: true, members: (data || []).map(normalizeMember) });
+    res.json({ success: true, members: [] });
   } catch (error) {
     console.error('Members GET error:', error.message || error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -246,6 +255,219 @@ router.post('/login', async (req, res) => {
     res.json({ success: true, message: '로그인 완료', token, user: normalizeMember(data) });
   } catch (error) {
     console.error('Members login error:', error.message || error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Change password
+router.put('/:id/password', async (req, res) => {
+  try {
+    const memberId = parseInt(req.params.id);
+    const { currentPassword, password } = req.body;
+
+    if (!currentPassword || !password) {
+      return res.status(400).json({ success: false, message: 'Current password and new password required' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
+    }
+
+    // Get member
+    let member = null;
+    
+    if (supabase.isConfigured) {
+      try {
+        const { data, error } = await supabase
+          .from('members')
+          .select('*')
+          .eq('id', memberId)
+          .single();
+        if (!error && data) {
+          member = normalizeMember(data);
+        }
+      } catch (err) {
+        console.log('Supabase member lookup failed, trying JSON fallback');
+      }
+    }
+
+    if (!member) {
+      const members = readMembersFromStore();
+      member = members.find(m => m.id === memberId);
+    }
+
+    if (!member) {
+      return res.status(404).json({ success: false, message: 'Member not found' });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, member.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Current password does not match' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update password in database
+    if (supabase.isConfigured) {
+      try {
+        await supabase
+          .from('members')
+          .update({ password: hashedPassword })
+          .eq('id', memberId);
+      } catch (err) {
+        console.log('Supabase update failed, trying JSON fallback');
+      }
+    }
+
+    // Update in JSON fallback
+    const members = readMembersFromStore();
+    const memberIndex = members.findIndex(m => m.id === memberId);
+    if (memberIndex !== -1) {
+      members[memberIndex].password = hashedPassword;
+      writeMembersToStore(members);
+    }
+
+    res.json({ success: true, message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Change password error:', error.message || error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Save room assignment
+router.post('/:id/room-assignment', async (req, res) => {
+  try {
+    const memberId = parseInt(req.params.id);
+    const { roomId, monthlyRent } = req.body;
+
+    if (!roomId) {
+      return res.status(400).json({ success: false, message: 'Room ID required' });
+    }
+
+    const members = readMembersFromStore();
+    const memberIndex = members.findIndex(m => m.id === memberId);
+    
+    if (memberIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Member not found' });
+    }
+
+    members[memberIndex].room_assignment = {
+      roomId,
+      monthlyRent: monthlyRent || 0,
+      assignmentDate: new Date().toISOString()
+    };
+
+    writeMembersToStore(members);
+
+    // Try to update in Supabase
+    if (supabase.isConfigured) {
+      try {
+        await supabase
+          .from('members')
+          .update({ room_assignment: members[memberIndex].room_assignment })
+          .eq('id', memberId);
+      } catch (err) {
+        console.log('Supabase room assignment update failed');
+      }
+    }
+
+    res.json({ success: true, message: 'Room assignment saved', data: members[memberIndex].room_assignment });
+  } catch (error) {
+    console.error('Save room assignment error:', error.message || error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Save rent payment
+router.post('/:id/rent-payment', async (req, res) => {
+  try {
+    const memberId = parseInt(req.params.id);
+    const { roomId, year, month, amount, paymentMethod, paymentDate } = req.body;
+
+    if (!roomId || !year || !month || !amount) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    const members = readMembersFromStore();
+    const memberIndex = members.findIndex(m => m.id === memberId);
+    
+    if (memberIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Member not found' });
+    }
+
+    if (!members[memberIndex].rent_payments) {
+      members[memberIndex].rent_payments = [];
+    }
+
+    const payment = {
+      id: Date.now(),
+      roomId,
+      year,
+      month,
+      amount,
+      paymentMethod: paymentMethod || 'credit_card',
+      paymentDate: paymentDate || new Date().toISOString(),
+      status: 'completed'
+    };
+
+    members[memberIndex].rent_payments.push(payment);
+
+    writeMembersToStore(members);
+
+    // Try to update in Supabase
+    if (supabase.isConfigured) {
+      try {
+        await supabase
+          .from('members')
+          .update({ rent_payments: members[memberIndex].rent_payments })
+          .eq('id', memberId);
+      } catch (err) {
+        console.log('Supabase rent payment update failed');
+      }
+    }
+
+    res.json({ success: true, message: 'Rent payment recorded', data: payment });
+  } catch (error) {
+    console.error('Save rent payment error:', error.message || error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Get member profile with room assignment and rent payments
+router.get('/:id/profile', async (req, res) => {
+  try {
+    const memberId = parseInt(req.params.id);
+
+    // Try JSON first (contains room_assignment and rent_payments)
+    const members = readMembersFromStore();
+    let member = members.find(m => m.id === memberId);
+    if (member) {
+      return res.json({ success: true, data: normalizeMember(member) });
+    }
+
+    // Fall back to Supabase if not found in JSON
+    if (supabase.isConfigured) {
+      try {
+        const { data, error } = await supabase
+          .from('members')
+          .select('*')
+          .eq('id', memberId)
+          .single();
+        if (!error && data) {
+          member = normalizeMember(data);
+          return res.json({ success: true, data: member });
+        }
+      } catch (err) {
+        console.log('Supabase profile fetch failed');
+      }
+    }
+
+    res.status(404).json({ success: false, message: 'Member not found' });
+  } catch (error) {
+    console.error('Get profile error:', error.message || error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

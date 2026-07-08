@@ -12,6 +12,11 @@ async function handleLogin(event){
   }
 
   try {
+    // Ensure dorms are loaded first for room assignment processing
+    if (typeof ensureDormsLoaded === 'function') {
+      await ensureDormsLoaded();
+    }
+
     const response = await fetch(`${API_URL}/members/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -30,9 +35,31 @@ async function handleLogin(event){
       name: member.name,
       email: member.email,
       phone: member.phone,
+      bookedRoom: member.booked_room || member.bookedRoom || null,
       loginTime: new Date().toISOString()
     };
     localStorage.setItem('currentMember', JSON.stringify(session));
+
+    // Load member profile from server to sync room assignment and rent payments
+    if (typeof loadMemberProfileFromServer === 'function') {
+      try {
+        const serverProfile = await loadMemberProfileFromServer(member.id);
+        if (serverProfile) {
+          console.log('Loaded profile from server:', serverProfile);
+        }
+      } catch (err) {
+        console.log('Failed to load server profile, using localStorage:', err);
+      }
+    }
+
+    // If member has a booked room, save the room assignment
+    if (member.booked_room || member.bookedRoom) {
+      const roomId = member.booked_room || member.bookedRoom;
+      if (typeof setMemberRoomAssignment === 'function') {
+        setMemberRoomAssignment(member.id, roomId);
+      }
+    }
+
 
     alert('Logged in successfully!');
     location.href='index.html';

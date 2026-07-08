@@ -14,6 +14,20 @@ function normalizeImageList(value){
   return [];
 }
 
+function normalizePriceInput(value){
+  if(typeof value === 'number' && Number.isFinite(value)) return value;
+  if(typeof value === 'string'){
+    const trimmed=value.trim();
+    if(!trimmed) return '';
+    const cleaned=trimmed.replace(/[^0-9.]/g, '');
+    if(cleaned){
+      const parsed=parseFloat(cleaned);
+      if(Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return value;
+}
+
 function mergeRoomData(room){
   // Rely on server-provided room fields rather than localStorage overrides
   const sourceImages = normalizeImageList(room.rooms?.images || room.images || (room.image ? [room.image] : []));
@@ -177,24 +191,45 @@ function saveRoom(roomId){
     return;
   }
   
+  const normalizedPrice = normalizePriceInput(price);
+
   const roomData = {
-    price,
+    price: normalizedPrice,
     phone,
     email,
     paymentMethods,
+    description,
     fullDescription: description,
     isAvailable: !occupied
   };
+
+  const savedRoomData = JSON.parse(localStorage.getItem(`room_${roomId}`) || '{}');
+  const mergedRoomData = {
+    ...savedRoomData,
+    ...roomData,
+    price: normalizedPrice,
+    phone,
+    email,
+    paymentMethods,
+    description,
+    fullDescription: description,
+    occupied: occupied,
+    isAvailable: !occupied,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem(`room_${roomId}`, JSON.stringify(mergedRoomData));
 
   fetch(`${API_URL}/room/${roomId}`, {
     method: 'PUT',
     headers: getAdminFetchHeaders(),
     body: JSON.stringify(roomData)
-  }).then(r=>r.json()).then(result=>{
+  }).then(async r=>{
+    const result = await r.json().catch(()=>({ success:false, message:'Invalid response' }));
     if(result.success){
       alert(`Room ${roomId} saved successfully`);
-      // reload rooms to reflect changes
-      ensureDormsLoaded().then(()=>{ loadRoomOptions(); loadAdminPanel(); });
+      await ensureDormsLoaded();
+      loadRoomOptions();
+      loadAdminPanel();
     } else {
       alert('Failed to save room: ' + (result.message||'Unknown'));
     }
@@ -205,19 +240,42 @@ function uploadRoomImage(event, roomId){
   const file=event.target.files[0];
   if(file){
     const reader=new FileReader();
-    reader.onload=function(e){
+    reader.onload=async function(e){
       const newImage=e.target.result;
-      // Send image (base64) to server by updating the room images array
-      fetch(`${API_URL}/room/${roomId}`, {
-        method: 'PUT',
-        headers: getAdminFetchHeaders(),
-        body: JSON.stringify({ images: [newImage], image: newImage })
-      }).then(r=>r.json()).then(result=>{
+      try {
+        const roomResponse = await fetch(`${API_URL}/room/${roomId}`);
+        const roomData = await roomResponse.json();
+        if(!roomData.success) throw new Error('Failed to fetch room data');
+
+        const room = roomData.room || roomData;
+        const existingImages = Array.isArray(room.images) ? room.images.slice() : (room.image ? [room.image] : []);
+        const images = existingImages.concat(newImage);
+
+        const response = await fetch(`${API_URL}/room/${roomId}`, {
+          method: 'PUT',
+          headers: getAdminFetchHeaders(),
+          body: JSON.stringify({ images, image: newImage })
+        });
+
+        let result;
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          result = await response.json();
+        } else {
+          const text = await response.text();
+          result = { success: false, message: text.slice(0, 200) };
+        }
+
         if(result.success){
           alert('Image added successfully');
           ensureDormsLoaded().then(()=>{ loadAdminPanel(); });
-        } else { alert('Failed to upload image: '+(result.message||'Unknown')); }
-      }).catch(err=>{console.error('Image upload error',err);alert('Failed to upload image')});
+        } else {
+          alert('Failed to upload image: '+(result.message||'Unknown'));
+        }
+      } catch(err){
+        console.error('Image upload error',err);
+        alert('Failed to upload image');
+      }
     };
     reader.readAsDataURL(file);
   }
@@ -257,10 +315,18 @@ function setMainImage(roomId, imageIdx){
 
 function loadAmenitiesUI(){
   const amenitiesList=document.getElementById('amenities-list');
-  const amenities=getAmenities();
-  
+  let amenities=getAmenities();
+
+  if(!Array.isArray(amenities) || amenities.length === 0){
+    amenities=[];
+  }
+
+  while(amenities.length < 4){
+    amenities.push({ title: '', description: '' });
+  }
+
   amenitiesList.innerHTML='';
-  amenities.forEach((amenity, idx)=>{
+  amenities.slice(0, 4).forEach((amenity, idx)=>{
     const amenityCard=document.createElement('div');
     amenityCard.style.cssText='background:#f8f9fa;padding:15px;margin-bottom:15px;border-radius:8px;border-left:3px solid #f39c12';
     amenityCard.innerHTML=`
@@ -278,21 +344,20 @@ function loadAmenitiesUI(){
 }
 
 function saveAmenities(){
-  const amenities=getAmenities();
-  
-  amenities.forEach((amenity, idx)=>{
-    const title=document.getElementById(`amenity_title_${idx}`).value;
-    const description=document.getElementById(`amenity_desc_${idx}`).value;
-    
+  const amenities=[];
+
+  for(let idx=0; idx<4; idx+=1){
+    const title=document.getElementById(`amenity_title_${idx}`).value.trim();
+    const description=document.getElementById(`amenity_desc_${idx}`).value.trim();
+
     if(!title||!description){
       alert('Please fill in all fields');
       return;
     }
-    
-    amenity.title=title;
-    amenity.description=description;
-  });
-  
+
+    amenities.push({ title, description });
+  }
+
   localStorage.setItem('buildingAmenities',JSON.stringify(amenities));
   alert('Building Amenities saved successfully');
   loadAdminPanel();
@@ -568,9 +633,19 @@ async function fetchMembersFromApi(){
 function syncMemberRoomAssignment(memberId, roomId){
   if (!memberId || !roomId) return;
   const assignments = JSON.parse(localStorage.getItem('roomAssignments')) || {};
+  const room = dorms.find(r => r.id === roomId || r.id === parseInt(roomId));
+  let monthlyRent = 0;
+  if (room) {
+    if (typeof room.price === 'number') {
+      monthlyRent = room.price;
+    } else {
+      monthlyRent = parseFloat(String(room.price).replace(/[^0-9.]/g, '')) || 0;
+    }
+  }
+
   assignments[memberId] = {
     roomId,
-    monthlyRent: 0,
+    monthlyRent,
     assignmentDate: new Date().toISOString()
   };
   localStorage.setItem('roomAssignments', JSON.stringify(assignments));

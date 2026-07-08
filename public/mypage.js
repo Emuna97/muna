@@ -47,8 +47,14 @@ window.onload=async ()=>{
   document.getElementById('member-email').textContent=member.email;
   document.getElementById('member-phone').textContent=member.phone;
 
+  // Load server profile for synchronization
+  let serverProfile = null;
+  if (typeof loadMemberProfileFromServer === 'function') {
+    serverProfile = await loadMemberProfileFromServer(member.memberId);
+  }
+
   // Load room assignment info
-  loadRoomInfo(member.memberId);
+  loadRoomInfo(member.memberId, serverProfile);
 
   // Load rent payment history
   loadRentHistory(member.memberId);
@@ -57,9 +63,36 @@ window.onload=async ()=>{
   initializePaymentOptions();
 };
 
-function loadRoomInfo(memberId){
+function loadRoomInfo(memberId, serverProfile){
   const roomInfo=document.getElementById('room-info');
-  const assignment=getMemberRoomAssignment(memberId);
+  let assignment = null;
+
+  if (serverProfile && serverProfile.room_assignment && serverProfile.room_assignment.roomId) {
+    assignment = {
+      roomId: serverProfile.room_assignment.roomId,
+      monthlyRent: serverProfile.room_assignment.monthlyRent || getRoomMonthlyRent(serverProfile.room_assignment.roomId),
+      assignmentDate: serverProfile.room_assignment.assignmentDate || new Date().toISOString()
+    };
+  }
+
+  if (!assignment) {
+    assignment = getMemberRoomAssignment(memberId);
+  }
+
+  const member=getCurrentMember();
+  if(!assignment && member){
+    const bookedRoom=member.bookedRoom||member.booked_room;
+    if(bookedRoom){
+      const roomIdNumber=parseInt(bookedRoom);
+      if(roomIdNumber){
+        assignment={
+          roomId:roomIdNumber,
+          monthlyRent:getRoomMonthlyRent(roomIdNumber),
+          assignmentDate:new Date().toISOString()
+        };
+      }
+    }
+  }
 
   if(assignment){
     const room=getRoomData(assignment.roomId);
@@ -111,6 +144,14 @@ function initializePaymentOptions(){
     };
     paymentMethods.appendChild(option);
   });
+}
+
+function getRoomMonthlyRent(roomId){
+  const room=getRoomData(roomId);
+  if(!room) return 0;
+  if(typeof room.price==='number') return room.price;
+  const parsed=parseFloat(String(room.price).replace(/[^0-9.]/g,''));
+  return Number.isNaN(parsed)?0:parsed;
 }
 
 function loadRentHistory(memberId){
@@ -175,7 +216,7 @@ function processPayment(){
   }
 
   // Save payment record
-  recordRentPayment(member.memberId,selectedYear,selectedMonth,assignment.monthlyRent,selectedPaymentMethod);
+  recordRentPayment(member.memberId,selectedYear,selectedMonth,assignment.monthlyRent,selectedPaymentMethod,assignment.roomId);
 
   alert(`${selectedMonth}/${selectedYear} rent $${assignment.monthlyRent} paid successfully!\nMethod: ${selectedPaymentMethod}`);
 
@@ -202,8 +243,10 @@ function changePassword(){
   document.getElementById('new-password-confirm-error').textContent='';
 
   const member=getCurrentMember();
-  const allMembers=getAllMembers();
-  const fullMember=allMembers.find(m=>m.id===member.memberId);
+  if(!member){
+    alert('Please log in');
+    return;
+  }
 
   const currentPassword=document.getElementById('current-password').value;
   const newPassword=document.getElementById('new-password').value;
@@ -214,9 +257,6 @@ function changePassword(){
   // Validate current password
   if(!currentPassword){
     document.getElementById('current-password-error').textContent='Please enter current password';
-    hasError=true;
-  }else if(currentPassword!==fullMember.password){
-    document.getElementById('current-password-error').textContent='Current password does not match';
     hasError=true;
   }
 
@@ -238,17 +278,29 @@ function changePassword(){
 
   if(hasError) return;
 
-  // Change password
-  if(updatePassword(member.memberId,newPassword)){
-    alert('Password changed successfully!');
-    
-    // Clear input fields
-    document.getElementById('current-password').value='';
-    document.getElementById('new-password').value='';
-    document.getElementById('new-password-confirm').value='';
-  }else{
-    alert('Password change failed');
-  }
+  // Send to API to change password
+  fetch(`${API_URL}/members/${member.memberId}/password`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ currentPassword, password: newPassword })
+  })
+  .then(res => res.json())
+  .then(result => {
+    if(result.success){
+      alert('Password changed successfully!');
+      
+      // Clear input fields
+      document.getElementById('current-password').value='';
+      document.getElementById('new-password').value='';
+      document.getElementById('new-password-confirm').value='';
+    }else{
+      document.getElementById('current-password-error').textContent=result.message||'Password change failed';
+    }
+  })
+  .catch(error => {
+    console.error('Password change error:', error);
+    document.getElementById('current-password-error').textContent='Unable to connect to the server';
+  });
 }
 
 function submitUpdateMemberInfo(){

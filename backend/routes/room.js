@@ -16,26 +16,45 @@ function parseArray(value) {
   return [];
 }
 
+function normalizePriceValue(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+    const cleaned = trimmed.replace(/[^0-9.]/g, '');
+    if (cleaned) {
+      const parsed = parseFloat(cleaned);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return value;
+}
+
 function normalizeRoom(row) {
   const room = row || {};
   const images = Array.isArray(room.images)
     ? room.images
     : (room.image ? [room.image] : []);
+  const isAvailable = typeof room.is_available === 'boolean'
+    ? room.is_available
+    : (typeof room.isAvailable === 'boolean' ? room.isAvailable : true);
+  const occupied = typeof room.occupied === 'boolean'
+    ? room.occupied
+    : (room.occupied === 'true' || room.occupied === 1 || isAvailable === false || room.available === false || room.available === 'false');
 
   return {
     id: typeof room.id === 'string' ? parseInt(room.id, 10) : room.id,
     name: room.name || '',
     city: room.city || '',
-    price: room.price,
+    price: normalizePriceValue(room.price),
     image: room.image || '',
     images,
     description: room.description || room.desc || '',
     fullDescription: room.fullDescription || room.full_description || room.description || room.desc || '',
     features: parseArray(room.features),
     paymentMethods: parseArray(room.paymentMethods || room.payment_methods),
-    isAvailable: typeof room.is_available === 'boolean'
-      ? room.is_available
-      : (typeof room.isAvailable === 'boolean' ? room.isAvailable : true)
+    isAvailable,
+    occupied
   };
 }
 
@@ -125,10 +144,14 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
   try {
     const id = req.params.id;
     const updates = {};
-    const allowed = ['name', 'city', 'price', 'image', 'description', 'phone', 'email', 'address', 'paymentMethods', 'features', 'fullDescription', 'isAvailable'];
+    const allowed = ['name', 'city', 'price', 'image', 'images', 'description', 'phone', 'email', 'address', 'paymentMethods', 'features', 'fullDescription', 'isAvailable'];
 
     for (const key of allowed) {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+
+    if (updates.price !== undefined) {
+      updates.price = normalizePriceValue(updates.price);
     }
 
     const dbUpdates = {};
@@ -136,6 +159,7 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
     if (updates.city !== undefined) dbUpdates.city = updates.city;
     if (updates.price !== undefined) dbUpdates.price = updates.price;
     if (updates.image !== undefined) dbUpdates.image = updates.image;
+    if (updates.images !== undefined) dbUpdates.images = Array.isArray(updates.images) ? updates.images : parseArray(updates.images);
     if (updates.description !== undefined) dbUpdates.description = updates.description;
     if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
     if (updates.email !== undefined) dbUpdates.email = updates.email;
@@ -146,13 +170,16 @@ router.put('/:id', auth, adminAuth, async (req, res) => {
     if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
 
     if (supabase && supabase.isConfigured) {
-      const { data, error } = await supabase.from('rooms').update(dbUpdates).eq('id', id).select().maybeSingle();
-      if (!error && data) {
-        return res.json({ success: true, message: 'Room information updated successfully', room: normalizeRoom(data) });
-      }
-      if (error) {
-        console.error('Supabase room update error:', error.message || error);
-        return res.status(500).json({ success: false, message: 'Failed to update room' });
+      try {
+        const { data, error } = await supabase.from('rooms').update(dbUpdates).eq('id', id).select().maybeSingle();
+        if (!error && data) {
+          return res.json({ success: true, message: 'Room information updated successfully', room: normalizeRoom(data) });
+        }
+        if (error) {
+          console.error('Supabase room update error:', error.message || error);
+        }
+      } catch (error) {
+        console.error('Supabase room update exception:', error.message || error);
       }
     }
 
