@@ -1,5 +1,26 @@
-// Use relative API path in production. During local dev, set `window.__API_URL__` if needed.
-const API_URL = (typeof window !== 'undefined' && window.__API_URL__) ? window.__API_URL__ : '/api';
+// Use relative API path in production. During local dev, `window.__API_URL__` may be set.
+// Protect against cases where `window.__API_URL__` was accidentally left pointing
+// to a developer machine (e.g. http://localhost:5001). Prefer the current origin
+// so deployed clients always call the deployment domain's `/api`.
+let API_URL = null;
+if (typeof window !== 'undefined' && window.__API_URL__) {
+  try {
+    const candidate = String(window.__API_URL__ || '').trim();
+    // Ignore local dev hostnames in deployed clients
+    if (candidate && !/localhost|127\.0\.0\.1/.test(candidate)) {
+      API_URL = candidate;
+    }
+  } catch (e) {
+    API_URL = null;
+  }
+}
+if (!API_URL) {
+  // Use a relative, origin-prefixed API path so the browser talks to the same host
+  // that served the frontend (works for Render, Vercel, Netlify, etc.).
+  API_URL = (typeof window !== 'undefined' && window.location && window.location.origin)
+    ? `${window.location.origin}/api`
+    : '/api';
+}
 
 let dorms = [];
 
