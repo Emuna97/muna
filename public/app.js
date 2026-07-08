@@ -29,7 +29,9 @@ async function applyHomePageSettings(){
 }
 
 function updateLoginUI(){
-  const member=getCurrentMember();
+  const member = typeof getCurrentMember === 'function'
+    ? getCurrentMember()
+    : null;
   const loginLink=document.getElementById('login-link');
   const userInfo=document.getElementById('user-info');
   const mypageLink=document.getElementById('mypage-link');
@@ -44,7 +46,11 @@ function updateLoginUI(){
     loginLink.href='#';
     loginLink.onclick=(e)=>{
       e.preventDefault();
-      logoutMember();
+
+      if (typeof logoutMember === 'function') {
+        logoutMember();
+      }
+
       location.href='index.html';
     };
 
