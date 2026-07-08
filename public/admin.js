@@ -31,6 +31,13 @@ function mergeRoomData(room){
   };
 }
 
+function getAdminFetchHeaders(){
+  return {
+    'Content-Type': 'application/json',
+    'x-admin-password': ADMIN_PASSWORD
+  };
+}
+
 function adminLogin(){
   const pwd=document.getElementById('admin-password').value;
   if(pwd===ADMIN_PASSWORD){
@@ -181,7 +188,7 @@ function saveRoom(roomId){
 
   fetch(`${API_URL}/room/${roomId}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAdminFetchHeaders(),
     body: JSON.stringify(roomData)
   }).then(r=>r.json()).then(result=>{
     if(result.success){
@@ -203,7 +210,7 @@ function uploadRoomImage(event, roomId){
       // Send image (base64) to server by updating the room images array
       fetch(`${API_URL}/room/${roomId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminFetchHeaders(),
         body: JSON.stringify({ images: [newImage], image: newImage })
       }).then(r=>r.json()).then(result=>{
         if(result.success){
@@ -226,7 +233,7 @@ function removeImage(roomId, imageIdx){
     images.splice(imageIdx,1);
     const newMain = images[0] || null;
     fetch(`${API_URL}/room/${roomId}`,{
-      method:'PUT',headers:{'Content-Type':'application/json'},
+      method:'PUT',headers:getAdminFetchHeaders(),
       body:JSON.stringify({ images, image: newMain })
     }).then(r=>r.json()).then(result=>{
       if(result.success){ alert('Image deleted successfully'); ensureDormsLoaded().then(()=>loadAdminPanel()); }
@@ -243,7 +250,7 @@ function setMainImage(roomId, imageIdx){
     const images = Array.isArray(room.images) ? room.images : (room.image ? [room.image] : []);
     if(!images[imageIdx]) return alert('Image not found');
     const newMain = images[imageIdx];
-    fetch(`${API_URL}/room/${roomId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({ image: newMain })})
+    fetch(`${API_URL}/room/${roomId}`,{method:'PUT',headers:getAdminFetchHeaders(),body:JSON.stringify({ image: newMain })})
       .then(r=>r.json()).then(result=>{ if(result.success){ alert('Main image set successfully'); ensureDormsLoaded().then(()=>loadAdminPanel()); } else alert('Failed to set main image'); });
   });
 }
