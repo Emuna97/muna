@@ -1,58 +1,33 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const path = require('path');
-const fs = require('fs');
+const connectDB = require('./backend/db'); // 방금 수정한 db.js 불러오기
 
 const app = express();
 
-// Middleware
+// 🎯 MongoDB 연결 실행
+connectDB();
+
 app.use(cors());
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 정적 파일 서빙 (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((err, req, res, next) => {
-  if (err && err.type === 'entity.too.large') {
-    return res.status(413).json({ success: false, message: 'Payload too large' });
-  }
-  next(err);
-});
-
-// Initialize JSON file-based database
-const dbDir = path.join(__dirname, 'db');
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir);
-  console.log('DB directory created');
-}
-
-console.log('JSON-based database ready');
-
-// Routes
+// 🔗 라우터 연결 (기존 라우터 파일들)
 app.use('/api/auth', require('./backend/routes/auth'));
-app.use('/api/payment', require('./backend/routes/payment'));
-app.use('/api/booking', require('./backend/routes/booking'));
-app.use('/api/room', require('./backend/routes/room'));
+app.use('/api/rooms', require('./backend/routes/room'));
+app.use('/api/bookings', require('./backend/routes/booking'));
+app.use('/api/payments', require('./backend/routes/payment'));
 app.use('/api/members', require('./backend/routes/members'));
 app.use('/api/settings', require('./backend/routes/settings'));
 
-// Health check
+// 배포 상태 점검용 헬스체크 API
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'Server is running normally' });
+  res.status(200).json({ status: 'ok', database: 'connected' });
 });
 
-// Frontend route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/index.html'));
-});
-
-const port = process.env.PORT || 5001;
-
-if (require.main === module) {
-  app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-  });
-}
-
-module.exports = app;
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
